@@ -1,8 +1,5 @@
-CustomProject
+CustomProject - Kishan Nirghin 10823778
 =============
-
-#Kishan Nirghin
-#10823778
 
 ##Intro
 Mijn app voorstel is een zelf gemaakte platform game.
@@ -26,14 +23,14 @@ De knoppen aan de rechter onderkant van het scherm staan voor de verschillende s
 ##Aanvallen
 Door op één van de aanval knoppen de drukken rechts onder in het scherm kan je je character aansturen om een aanval uit te voeren.
 Het onderstaande scherm demonstreert hoe een aanval eruit zou kunnen komen te zien. 
-![Figuur 3: Aanval 1 – Dit is een vooruit vliegende bol die een tegenstander zou kunnen raken](/concept/aanval1.png)  
+![Figuur 3: Aanval 1 – Dit is een vooruit vliegende bol die een tegenstander zou kunnen raken](/concept/attack1.png)  
 
 ##Verdedigen
 Een goeie fighter game moet niet alleen manieren hebben om aan te vallen, maar ook manieren om je zelf te verdedigen. Verdedigen kan je doen door op een van de aanval knoppen te drukken.
 In het onderstaande scherm is gedemonstreerd hoe zo een verdediging eruit kan komen te zien.  
-![Figuur 4: Verdediging 1](/concept/verdediging1.png)
+![Figuur 4: Verdediging 1](/concept/defence1.png)
 
 ##Speciaal
 Om het spel iets actiever te houden kan je character tijdelijk speciale krachten krijgen. Het sterretje in het onderstaande scherm betekent dat je bent opgeladen om je speciale krachten te activeren.
 Het activeren van je speciale kracht doe je door je telefoon te schudden. Voor het detecteren van het geschud word gebruik gemaakt van een API.
-![Figuur 4: Speciaal](/concept/speciaal.png)
+![Figuur 4: Speciaal](/concept/special.png)
