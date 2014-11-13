@@ -1,7 +1,7 @@
 MageFighters - Kishan Nirghin 10823778
 =============
-#Ik heb nog te weinig research gedaan om nu al weten hoe ik alle methodes ga maken. En meestal kom ik er doende weg achter hoe ik het wil aanpakken.
-Voor een echte lijst met alle classes en methodes, zie de code!
+##Ik heb nog te weinig research gedaan om nu al weten hoe ik alle methodes ga maken. En meestal kom ik er doende weg achter hoe ik het wil aanpakken.
+##Voor een echte lijst met alle classes en methodes, zie de code!
 
 ##a list of classes and public methods (and their return types and/or arguments) that you’ve decided to implement;
 ###Entity class
