@@ -1,42 +1,112 @@
 MageFighters - Kishan Nirghin 10823778
 =============
-##Ik heb nog te weinig research gedaan om nu al weten hoe ik alle methodes ga maken. En meestal kom ik er doende weg achter hoe ik het wil aanpakken.
-##Voor een echte lijst met alle classes en methodes, zie de code!
+###Ik heb nog te weinig research gedaan om nu al weten hoe ik alle methodes ga maken. En meestal kom ik er doende weg achter hoe ik het wil aanpakken.
+###Voor een echte lijst met alle classes en methodes, zie de code!
 
-##a list of classes and public methods (and their return types and/or arguments) that you’ve decided to implement;
-###Entity class
-- methodes om X en Y coordinaten te 'getten' en 'setten'
-- methode om health aan te passen
-- methode om een entity te laten springen
-- collision detection methodes
+##a list of classes and public methods (and their return types and/or arguments) that you’ve decided to implement
+###MainMenu class
+- Dit is het scherm die elke nieuwe gebruiker op het begin te zien krijgt
+```java
+//zet de contentView
+public void onCreate()
 
-###Player class
-- een player is een entity (dus extends of implements)
+//verandert de activity naar gameActivity
+public void startGame()
 
-###Enemy class
-- een enemy is een entity (dus extends of implements)
+//verandert de activity naar highscoreActivity
+public void viewHighScore()
 
-###Aanval class
-- methodes om X en Y coordinaten te 'getten' en 'setten'
-- collision detection methodes
+//verandert de activity naar settingsActivity
+public void settings()
+```
 
-###Map class
-- collision detection methodes
+###highscoreActivity class
+```java
+public void getHighscores()
+```
 
-###Game class
-- methode om de controls te tekenen
-- methode om input te herkennen
-- methode om te kijken of er op de knoppen zijn gedrukt
-- methode om alles te tekenen
-- methode om alle posities te updaten
-- methode om pauses te handelen
-- methode om terug te gaan naar een ander scherm
-- methode om het spel te starten
-- methode om het spel te beeindigen (gameover)
+###settingsActivity class
+```java
+public void setVolume(int volume)
+public void resetGame()
+public void goBack()
+```
 
+###GameActivity class
+- Is de activity die de gameView maakt
+```java
+//set de contentView op new GameView, of een opgeslagen gameView
+public void onCreate()
+
+//moet de huidige gameView state opslaan en de activity sluiten
+public void onBackPressed()
+
+```
+
+###GameView class
+```java
+//Moet alle objecten updaten
+void Update()
+
+//Moet alle objecten tekenen
+protected void onDraw(Canvas canvas)
+
+//Houd bij op welke knoppen er gedrukt zijn
+public boolean onTouchEvent(MotionEvent ev)
+	return true;
+```
+
+###GameLoopThread class
+```java
+//is de thread die de framerate constant probeert te houden
+public void run()
+
+//zorgt er voor dat er geen updates vanuit run() naar de canvas worden gestuurt
+public void setRunning(boolean run)
+```
+
+###Player
+```java
+//update de spelers positie elke frame
+public void update()
+
+//functies spreken voor zich
+public void moveLeft()
+public void moveRight()
+public void stop()
+public void jump()
+public void attack()
+
+//geeft een rectangle terug voor collision detection
+public void getRect()
+```
+
+###Button
+```java
+public boolean isTouched()
+public boolean isPressed()
+public boolean isReleased()
+public void getRect()
+```
+
+###Attack
+```java
+public void update()
+public void isVisible()
+```
+
+###Enemy
+```java
+public void handleCollision(Attack attack)
+public void update()
+```
 
 ##more advanced sketches of UIs that clearly explain which features are connected to which underlying classes;
-- Komt nog
+![Figuur 1: Main menu](../concept/mainmenu.png) 
+![Figuur 2: Spelscherm](..-/concept/basics.png)
+![Figuur 3: Aanval 1 – Dit is een vooruit vliegende bol die een tegenstander zou kunnen raken](/concept/attack1.png)
+![Figuur 4: Verdediging 1](/concept/defence1.png)
+![Figuur 5: Speciaal](/concept/special.png)
 
 ##a list of APIs and frameworks that you will be using to provide functionality in your app;
 - API om highscores op te slaan in een SQLite database

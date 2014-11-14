@@ -33,4 +33,4 @@ In het onderstaande scherm is gedemonstreerd hoe zo een verdediging eruit kan ko
 ##Speciaal
 Om het spel iets actiever te houden kan je character tijdelijk speciale krachten krijgen. Het sterretje in het onderstaande scherm betekent dat je bent opgeladen om je speciale krachten te activeren.
 Het activeren van je speciale kracht doe je door je telefoon te schudden. Voor het detecteren van het geschud word gebruik gemaakt van een API.
-![Figuur 4: Speciaal](/concept/special.png)
+![Figuur 5: Speciaal](/concept/special.png)
