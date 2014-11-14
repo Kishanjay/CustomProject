@@ -109,8 +109,8 @@ public void update()
 ![Figuur 5: Speciaal](/concept/special.png)
 
 ##a list of APIs and frameworks that you will be using to provide functionality in your app;
-- API om highscores op te slaan in een SQLite database
-- API om ervoor te zorgen dat 'geschud' herkent word, dus een soort van motionsensor
+- API om highscores op te slaan, ik denk dat ik hiervoor de google play game API ga gebruiken
+- API om ervoor te zorgen dat 'geschud' herkent word, dus de van motionsensor API
 
 ##a list of database tables and fields (and their types) that you’ve decided to implement (if needed).
 - Datatable met de volgende colomns: id, timestamp, ip_addr, name, score, game_version 
