@@ -1,15 +1,21 @@
 package nl.rukish.mageknights;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -20,6 +26,7 @@ import android.view.WindowManager;
 public class GameView extends SurfaceView {
 	private SurfaceHolder holder;
 	GameLoopThread gameLoopThread;
+	AssetManager assetManager;
 
 	private Button left, right, attack, defend, jump;
 
@@ -27,10 +34,12 @@ public class GameView extends SurfaceView {
 	static Map currentMap;
 	static Enemy enemy1;
 	static int score;
+	static Bitmap spriteSheet;
 
 	public GameView(Context context) {
 		super(context);
 		gameLoopThread = new GameLoopThread(this);
+		assetManager = context.getAssets();
 
 		createMap(context);
 		initVariables();
@@ -67,6 +76,15 @@ public class GameView extends SurfaceView {
 		defend = new Button(currentMap.width-100, currentMap.height-200, 80, 80);
 		
 		score = 0;
+		
+		InputStream in = null;
+		try {
+			in = assetManager.open("spriteSheet.png");
+			spriteSheet = BitmapFactory.decodeStream(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void createMap(Context context){
@@ -131,6 +149,9 @@ public class GameView extends SurfaceView {
 		for (int i = 0; i < enemy1.getHealth(); i++){
 			canvas.drawRect(330 + (i * 40), 20, 360 + (i * 40), 50, blue);
 		}
+		Rect p = new Rect(0, 0, 15, 35);
+		Bitmap test = Bitmap.createBitmap(spriteSheet, 60, 0, 15, 35);
+		canvas.drawBitmap(flipBitmap(test), p, player1.getRect(), blue);
 	}
 
 	private void drawMap(Canvas canvas){
@@ -251,5 +272,14 @@ public class GameView extends SurfaceView {
 			}
 		}
 		return true;
+	}
+	
+	public Bitmap flipBitmap(Bitmap src)
+	{
+	    Matrix m = new Matrix();
+	    m.preScale(-1, 1);
+	    Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), m, false);
+	    dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+	    return dst;
 	}
 }
