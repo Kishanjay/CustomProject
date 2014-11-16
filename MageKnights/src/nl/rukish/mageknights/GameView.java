@@ -26,6 +26,7 @@ public class GameView extends SurfaceView {
 	static Player player1;
 	static Map currentMap;
 	static Enemy enemy1;
+	static int score;
 
 	public GameView(Context context) {
 		super(context);
@@ -64,6 +65,8 @@ public class GameView extends SurfaceView {
 		jump = new Button(currentMap.width-200, currentMap.height-110, 80, 80);
 		attack = new Button(currentMap.width-100, currentMap.height-110, 80, 80);
 		defend = new Button(currentMap.width-100, currentMap.height-200, 80, 80);
+		
+		score = 0;
 	}
 	
 	private void createMap(Context context){
@@ -98,7 +101,9 @@ public class GameView extends SurfaceView {
 		drawMap(canvas);
 		drawButtons(canvas);
 		
-		canvas.drawText("FPS: " + Integer.toString((int) GameLoopThread.currentFPS), 600,
+		canvas.drawText("FPS: " + Integer.toString((int) GameLoopThread.currentFPS), 800,
+				40, blue);
+		canvas.drawText("Score: " + Integer.toString(score), 600,
 				40, blue);
 		
 		//Player draw stuff

@@ -6,8 +6,7 @@ import android.graphics.Rect;
 
 public class Enemy extends Player {
 
-	private int health, movingSpeed, movingFrames, spawnTime;
-	private boolean visible;
+	private int  movingFrames, spawnTime;
 	Random rand;
 
 	public Enemy(int xPos, int yPos, int width, int height) {
@@ -24,15 +23,27 @@ public class Enemy extends Player {
 	public void updateEnemy() {
 		//KO SENSOR
 		if (health <= 0){
-			visible = false;
+			if (visible == true){
+				GameView.score ++;
+				visible = false;
+			}
+			if (attack.size() > 0)
+				attack.removeAll(attack);
 			if (spawnTime > 0){
 				spawnTime--;
 			}
 			else {
 				health = 3;
-				spawnTime = 60;
-				movingSpeed++;
-				moveTo(400, 200);
+				spawnTime = 200;
+				if (movingSpeed >= 7){
+					if (attackCooldown > 0)
+						attackCooldown--;
+				}
+				else {
+					movingSpeed++;
+				}
+				
+				moveTo(rand.nextInt(800), 0);
 				visible = true;
 			}
 			return;

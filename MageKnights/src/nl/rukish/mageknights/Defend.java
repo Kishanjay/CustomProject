@@ -53,10 +53,10 @@ public class Defend {
 			}
 		}
 		List<Attack> attack2 = GameView.enemy1.attack;
-		for (int i = 0; i < attack.size(); i++) {
-			Attack att = (Attack) attack.get(i);
+		for (int i = 0; i < attack2.size(); i++) {
+			Attack att = (Attack) attack2.get(i);
 			if (intersectDefend(att.getRect())) {
-				attack.remove(i);
+				attack2.remove(i);
 			}
 		}
 	}

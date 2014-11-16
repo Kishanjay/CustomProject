@@ -39,14 +39,14 @@ public class Attack {
 	public void checkCollision(){
 		Rect playerRect = GameView.player1.getRect();
 		if (intersectAttack(playerRect)){
-			GameView.player1.hit();
+			GameView.player1.hit(xSpeed);
 			visible = false;
 			return;
 		}
 		
 		Rect enemyRect = GameView.enemy1.getRect();
 		if (intersectAttack(enemyRect)){
-			GameView.enemy1.hit();
+			GameView.enemy1.hit(xSpeed);
 			visible = false;
 			return;
 		}

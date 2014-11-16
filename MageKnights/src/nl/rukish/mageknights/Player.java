@@ -15,29 +15,35 @@ public class Player {
 	private boolean jumped;
 	public List<Attack> attack;
 	private int direction; // 1 is right -1 is left
-	private int health;
+	protected int health;
 	public Defend defend;
-	private boolean visible;
+	protected boolean visible;
+	private int cooldown;
 
 	// Powers
-	private int movingSpeed;
-	private int jumpingPower;
+	protected int movingSpeed;
+	protected int jumpingPower;
+	protected int attackCooldown;
 
 	public Player(int xPos, int yPos, int width, int height) {
 		this.xPos = xPos;
 		this.yPos = yPos;
 		this.width = width;
 		this.height = height;
-		movingSpeed = 7; // default
+		movingSpeed = 5; // default
 		jumpingPower = 17; // default
 		jumped = false;
 		direction = 1;
 		attack = new ArrayList<Attack>();
-		health = 3;
+		health = 5;
 		visible = true;
+		cooldown = 0;
+		attackCooldown = 30;
+		
 	}
 
 	public void update() {
+		cooldown--;
 		for (int i = 0; i < attack.size(); i++) {
 			Attack att = (Attack) attack.get(i);
 			if (att.isVisible())
@@ -164,7 +170,11 @@ public class Player {
 	}
 
 	public void attack() {
-		attack.add(new Attack(xPos + width/2, yPos + 10, 20, 10, direction));
+		if (cooldown <= 0){
+			attack.add(new Attack(xPos + width/2, yPos + 10, 20, 10, direction));
+			cooldown = attackCooldown;
+		}
+		
 	}
 	
 	public void defend(){
@@ -172,9 +182,10 @@ public class Player {
 			defend = new Defend(xPos + width/4, yPos + height, 20, 80, direction);
 	}
 	
-	public void hit(){
+	public void hit(int dir){
 		//got hit
 		health --;
+		xPos = xPos + 2 * dir;
 		
 	}
 
