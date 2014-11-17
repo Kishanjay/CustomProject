@@ -10,57 +10,61 @@ public class Attack {
 	private int power;
 	private int xSpeed, ySpeed;
 	private boolean visible;
-	
+
 	public Attack(int xPos, int yPos, int width, int height, int direction) {
-		this.xPos = xPos + (GameView.player1.getWidth()/2+3) * direction - width/2;
+		this.xPos = xPos + (GameView.player1.getWidth() / 2 + 3) * direction
+				- width / 2;
 		this.yPos = yPos;
 		this.width = width;
 		this.height = height;
-		xSpeed = 10*direction;
+		xSpeed = 10 * direction;
 		ySpeed = 0;
 		visible = true;
 	}
 
-	
-	public Rect getRect(){
-		Rect rect = new Rect(xPos, yPos, xPos+width, yPos+height);
+	public Rect getRect() {
+		Rect rect = new Rect(xPos, yPos, xPos + width, yPos + height);
 		return rect;
 	}
-	
-	public void update(){
+
+	public void update() {
 		xPos += xSpeed;
 		yPos += ySpeed;
-		if (xPos > 900){
+		if (xPos > 900) {
 			visible = false;
 		}
 		checkCollision();
 	}
-	
-	public void checkCollision(){
-		Rect playerRect = GameView.player1.getRect();
-		if (intersectAttack(playerRect)){
-			GameView.player1.hit(xSpeed);
-			visible = false;
-			return;
+
+	public void checkCollision() {
+		if (GameView.player1.isVisible()) {
+			Rect playerRect = GameView.player1.getRect();
+			if (intersectAttack(playerRect)) {
+				GameView.player1.hit(xSpeed);
+				visible = false;
+				return;
+			}
 		}
-		
-		Rect enemyRect = GameView.enemy1.getRect();
-		if (intersectAttack(enemyRect)){
-			GameView.enemy1.hit(xSpeed);
-			visible = false;
-			return;
+
+		if (GameView.enemy1.isVisible()) {
+			Rect enemyRect = GameView.enemy1.getRect();
+			if (intersectAttack(enemyRect)) {
+				GameView.enemy1.hit(xSpeed);
+				visible = false;
+				return;
+			}
 		}
 	}
-	
-	public boolean isVisible(){
+
+	public boolean isVisible() {
 		return visible;
 	}
-	
+
 	public boolean intersectAttack(Rect r) {
 		Rect attackRect = getRect();
 		boolean noCollision = (attackRect.right < r.left
 				|| attackRect.left > r.right || attackRect.top > r.bottom || attackRect.bottom < r.top);
 		return !noCollision;
 	}
-	
+
 }

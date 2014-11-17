@@ -3,10 +3,10 @@ package nl.rukish.mageknights;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 public class Player {
-
 	// Control variables
 	private int xPos;
 	private int yPos;
@@ -24,6 +24,10 @@ public class Player {
 	protected int movingSpeed;
 	protected int jumpingPower;
 	protected int attackCooldown;
+	
+	//visual
+	protected Bitmap b_standing, b_jumping, b_running, b_attack, b_defend, b_bullet, b_wall;
+	private int frameNumber, lastAttackFrameNumber, lastDefendFrameNumber;
 
 	public Player(int xPos, int yPos, int width, int height) {
 		this.xPos = xPos;
@@ -39,11 +43,14 @@ public class Player {
 		visible = true;
 		cooldown = 0;
 		attackCooldown = 30;
-		
+		frameNumber = 0;
+		lastAttackFrameNumber = 0;
+		lastDefendFrameNumber = 0;
 	}
 
 	public void update() {
 		cooldown--;
+		frameNumber++;
 		for (int i = 0; i < attack.size(); i++) {
 			Attack att = (Attack) attack.get(i);
 			if (att.isVisible())
@@ -173,6 +180,7 @@ public class Player {
 		if (cooldown <= 0){
 			attack.add(new Attack(xPos + width/2, yPos + 10, 20, 10, direction));
 			cooldown = attackCooldown;
+			lastAttackFrameNumber = frameNumber;
 		}
 		
 	}
@@ -180,6 +188,7 @@ public class Player {
 	public void defend(){
 		if (!jumped)
 			defend = new Defend(xPos + width/4, yPos + height, 20, 80, direction);
+			lastDefendFrameNumber = frameNumber;
 	}
 	
 	public void hit(int dir){
@@ -204,5 +213,70 @@ public class Player {
 	
 	public boolean isVisible(){
 		return visible;
+	}
+	
+	public Bitmap getBitmap(){
+		Bitmap bmp;
+		if (frameNumber - lastAttackFrameNumber < 10){
+			bmp = b_attack;
+		}
+		else if (jumped){
+			bmp = b_jumping;
+		}
+		
+		else if (frameNumber - lastDefendFrameNumber < 10){
+			bmp = b_defend;
+		}
+		else if (speedX == 0){
+			bmp = b_standing;
+		}
+		else {
+			bmp = Bitmap.createBitmap(b_running, 0 + ((frameNumber % 30)/10 * 30), 0, 30, 30);
+		}
+		if (direction == -1){
+			return (GameView.flipBitmap(bmp));
+		}
+		return (bmp);
+	}
+
+	public Bitmap getB_standing() {
+		return b_standing;
+	}
+
+	//Images getters and setters
+	public void setB_standing(Bitmap b_standing) {
+		this.b_standing = b_standing;
+	}
+
+	public Bitmap getB_jumping() {
+		return b_jumping;
+	}
+
+	public void setB_jumping(Bitmap b_jumping) {
+		this.b_jumping = b_jumping;
+	}
+
+	public Bitmap getB_running() {
+		return b_running;
+	}
+
+	public void setB_running(Bitmap b_running) {
+		this.b_running = b_running;
+	}
+
+	public Bitmap getB_attack() {
+		return b_attack;
+	}
+
+	public void setB_attack(Bitmap b_attack) {
+		this.b_attack = b_attack;
+	}
+
+	public Bitmap getB_defend() {
+		return b_defend;
+	}
+
+	public void setB_defend(Bitmap b_defend) {
+		this.b_defend = b_defend;
 	}
 }
