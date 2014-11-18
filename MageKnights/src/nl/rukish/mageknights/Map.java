@@ -75,4 +75,8 @@ public class Map {
 		totalMap.addAll(rightWalls);
 		return totalMap;
 	}
+	
+	public Rect getRect(){
+		return new Rect(0, 0, width, height);
+	}
 }

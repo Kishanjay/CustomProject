@@ -26,8 +26,10 @@ public class Player {
 	protected int attackCooldown;
 	
 	//visual
-	protected Bitmap b_standing, b_jumping, b_running, b_attack, b_defend, b_bullet, b_wall;
+	protected Bitmap b_standing, b_jumping, b_attack, b_defend, b_bullet, b_wall;
+	protected List<Bitmap> b_running = new ArrayList<Bitmap>();
 	private int frameNumber, lastAttackFrameNumber, lastDefendFrameNumber;
+	private int b_runningDelay = 10;
 
 	public Player(int xPos, int yPos, int width, int height) {
 		this.xPos = xPos;
@@ -231,7 +233,7 @@ public class Player {
 			bmp = b_standing;
 		}
 		else {
-			bmp = Bitmap.createBitmap(b_running, 0 + ((frameNumber % 30)/10 * 30), 0, 30, 30);
+			bmp = b_running.get((frameNumber % (b_running.size()*b_runningDelay))/b_runningDelay);
 		}
 		if (direction == -1){
 			return (GameView.flipBitmap(bmp));
@@ -254,14 +256,6 @@ public class Player {
 
 	public void setB_jumping(Bitmap b_jumping) {
 		this.b_jumping = b_jumping;
-	}
-
-	public Bitmap getB_running() {
-		return b_running;
-	}
-
-	public void setB_running(Bitmap b_running) {
-		this.b_running = b_running;
 	}
 
 	public Bitmap getB_attack() {
