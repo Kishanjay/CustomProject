@@ -41,7 +41,7 @@ public class Player {
 		jumped = false;
 		direction = 1;
 		attack = new ArrayList<Attack>();
-		health = 5;
+		health = 1;
 		visible = true;
 		cooldown = 0;
 		attackCooldown = 30;

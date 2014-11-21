@@ -27,6 +27,7 @@ public class GameView extends SurfaceView {
 	private SurfaceHolder holder;
 	GameLoopThread gameLoopThread;
 	AssetManager assetManager;
+	GameViewListener gameViewListener;
 
 	private Button left, right, attack, defend, jump;
 
@@ -39,6 +40,9 @@ public class GameView extends SurfaceView {
 
 	public GameView(Context context) {
 		super(context);
+		
+		gameViewListener = (GameViewListener) context;
+		
 		gameLoopThread = new GameLoopThread(this);
 		assetManager = context.getAssets();
 
@@ -133,12 +137,21 @@ public class GameView extends SurfaceView {
 	}
 
 	public void update() {
-		player1.update();
-		enemy1.updateEnemy();
+		if (player1.health <= 0){
+			gameViewListener.onSubmitScore(score);
+		}
+		else {
+			player1.update();
+			enemy1.updateEnemy();
+		}
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
+		if (player1.health <= 0){
+			canvas.drawColor(Color.BLACK); // background color
+			return;
+		}
 		//canvas.drawColor(Color.BLACK); // background color
 		canvas.drawBitmap(background, null, screenRect, null);
 		Paint blue = new Paint();

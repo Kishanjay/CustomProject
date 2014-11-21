@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class GameActivity extends ActionBarActivity {
+public class GameActivity extends ActionBarActivity implements GameViewListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +23,21 @@ public class GameActivity extends ActionBarActivity {
 		setContentView(new GameView(this));
 	}
 
+	
+	
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
+		this.finish();
+	}
+
+
+
+	@Override
+	public void onSubmitScore(int score) {
+		Intent intent = new Intent(this, HighscoreActivity.class);
+		intent.putExtra("score", score);
+		this.startActivity(intent);
 		this.finish();
 	}
 }

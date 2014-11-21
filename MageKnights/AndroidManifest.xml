@@ -29,6 +29,12 @@
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
+        <activity
+            android:name=".HighscoreActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:label="@string/title_activity_highscore" >
+        </activity>
     </application>
 
 </manifest>

@@ -21,11 +21,17 @@ public class MainMenu extends ActionBarActivity {
 		
 		
 		setContentView(R.layout.activity_main_menu);
-		startGame(null);
+		//startGame(null);
+		//showHighscores(null);
 	}
 
 	public void startGame(View view) {
 		Intent intent = new Intent(MainMenu.this, GameActivity.class);
+		MainMenu.this.startActivity(intent);
+	}
+	
+	public void showHighscores(View view) {
+		Intent intent = new Intent(MainMenu.this, HighscoreActivity.class);
 		MainMenu.this.startActivity(intent);
 	}
 	

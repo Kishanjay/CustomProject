@@ -23,7 +23,8 @@
     <Button 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Highscores"/>
+        android:text="Highscores"
+        android:onClick="showHighscores"/>
     
     <Button 
         android:layout_width="fill_parent"
