@@ -6,6 +6,13 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/tv_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
         android:layout_width="530dp"
         android:layout_height="wrap_content"
         android:text="Mage Knights"
@@ -29,5 +36,6 @@
     <Button 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Settings"/>
+        android:text="Settings"
+        android:onClick="openSettings"/>
 </LinearLayout>

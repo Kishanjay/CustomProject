@@ -2,12 +2,16 @@ package nl.rukish.mageknights;
 
 import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 public class MainMenu extends ActionBarActivity {
 
@@ -21,6 +25,7 @@ public class MainMenu extends ActionBarActivity {
 		
 		
 		setContentView(R.layout.activity_main_menu);
+		showUserName();
 		//startGame(null);
 		//showHighscores(null);
 	}
@@ -35,8 +40,35 @@ public class MainMenu extends ActionBarActivity {
 		MainMenu.this.startActivity(intent);
 	}
 	
+	public void openSettings(View view) {
+		Intent intent = new Intent(MainMenu.this, SettingsActivity.class);
+		MainMenu.this.startActivityForResult(intent, 1);
+	}
 	
-	
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+ 
+        switch (requestCode) {
+        case 1:
+            showUserName();
+            break;
+ 
+        }
+ 
+    }
+    
+    public void showUserName(){
+    	SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+    	
+    	String username = sharedPrefs.getString("prefUsername", "NULL");
+
+ 
+        TextView userNameTextView = (TextView) findViewById(R.id.tv_username);
+ 
+        userNameTextView.setText(username);
+    }
 	
 	// MENU STUFF
 	@Override
@@ -45,6 +77,15 @@ public class MainMenu extends ActionBarActivity {
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
 	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ( keyCode == KeyEvent.KEYCODE_MENU ) {
+	        openSettings(null);
+	        return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}   
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

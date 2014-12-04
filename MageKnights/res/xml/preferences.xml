@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_user_profile" >
+        <EditTextPreference
+            android:key="prefUsername"
+            android:summary="@string/pref_user_name_summary"
+            android:title="@string/pref_user_name" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_update_setting" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="prefSendReport"
+            android:summary="@string/pref_send_report_summary"
+            android:title="@string/pref_send_report" >
+        </CheckBoxPreference>
+        
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="prefUpdate"
+            android:summary="@string/pref_auto_update_summary"
+            android:title="@string/pref_auto_update" >
+        </CheckBoxPreference>
+        
+   		<Preference
+            android:key="prefReset"
+            android:summary="@string/pref_reset_summary"
+            android:title="@string/pref_reset"
+            android:onClick="resetScore"
+        />     
+    </PreferenceCategory>
+  
+    <PreferenceCategory android:title="@string/pref_about" >
+        <Preference
+            android:key="prefAbout"
+            android:summary="@string/pref_about_summary"
+            android:title="@string/pref_about"
+            />
+    </PreferenceCategory>
+        
+
+</PreferenceScreen>

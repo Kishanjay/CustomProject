@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -30,6 +32,7 @@ public class GameView extends SurfaceView {
 	GameViewListener gameViewListener;
 
 	private Button left, right, attack, defend, jump;
+	private Button button_menu, button_retry;
 
 	static Player player1;
 	static Map currentMap;
@@ -37,6 +40,8 @@ public class GameView extends SurfaceView {
 	static int score;
 	static Bitmap spriteSheet, spriteSheet2, background;
 	static Rect screenRect;
+	
+	private boolean scoreSubmitted;
 
 	public GameView(Context context) {
 		super(context);
@@ -85,6 +90,10 @@ public class GameView extends SurfaceView {
 				80, 80);
 
 		score = 0;
+		scoreSubmitted = false;
+		
+		button_retry = new Button(200, 400, 200, 50);
+		button_menu = new Button(450, 400, 200, 50);
 
 		InputStream in = null;
 		try {
@@ -108,6 +117,7 @@ public class GameView extends SurfaceView {
 		player1.b_defend = Bitmap.createBitmap(spriteSheet, 182, 473, 28, 32);
 		player1.b_bullet = Bitmap.createBitmap(spriteSheet, 315, 250, 25, 15);
 		player1.b_wall = Bitmap.createBitmap(spriteSheet, 207, 120, 32, 48);
+		player1.b_dead = Bitmap.createBitmap(spriteSheet, 158, 961, 34, 19);
 		
 		enemy1.b_standing = Bitmap.createBitmap(spriteSheet2, 67, 3, 25, 40);
 		enemy1.b_running.add(Bitmap.createBitmap(spriteSheet2, 60, 54, 37, 53));
@@ -116,6 +126,7 @@ public class GameView extends SurfaceView {
 		enemy1.b_jumping = Bitmap.createBitmap(spriteSheet2, 115, 129, 30, 40);
 		enemy1.b_attack = Bitmap.createBitmap(spriteSheet2, 117, 503, 33, 37);
 		enemy1.b_bullet = Bitmap.createBitmap(spriteSheet2, 291, 514, 17, 17);
+		
 	}
 
 	private void createMap(Context context) {
@@ -137,21 +148,12 @@ public class GameView extends SurfaceView {
 	}
 
 	public void update() {
-		if (player1.health <= 0){
-			gameViewListener.onSubmitScore(score);
-		}
-		else {
-			player1.update();
-			enemy1.updateEnemy();
-		}
+		player1.update();
+		enemy1.updateEnemy();
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (player1.health <= 0){
-			canvas.drawColor(Color.BLACK); // background color
-			return;
-		}
 		//canvas.drawColor(Color.BLACK); // background color
 		canvas.drawBitmap(background, null, screenRect, null);
 		Paint blue = new Paint();
@@ -169,7 +171,12 @@ public class GameView extends SurfaceView {
 
 		// Player draw stuff
 		//canvas.drawRect(player1.getRect(), blue);
-		canvas.drawBitmap((player1.getBitmap()), null, player1.getRect(), null);
+		
+		if (player1.health > 0)
+			canvas.drawBitmap((player1.getBitmap()), null, player1.getRect(), null);
+		else
+			canvas.drawBitmap(player1.b_dead, player1.getRect().left, player1.getRect().top, null);
+		//Rect dead = new Rect(player1.getRect().left, player1.getRect().top,player1.getRect().left + 34, player1.getRect().top + 19);
 		List<Attack> attacks = player1.attack;
 		for (int i = 0; i < attacks.size(); i++) {
 			Attack att = (Attack) attacks.get(i);
@@ -199,6 +206,14 @@ public class GameView extends SurfaceView {
 			canvas.drawRect(330 + (i * 40), 20, 360 + (i * 40), 50, blue);
 		}
 
+		if (player1.health <= 0){
+			drawGameOver(canvas);
+			if (!scoreSubmitted){
+				scoreSubmitted = true;
+				gameViewListener.onSubmitScore(score);
+			}
+			
+		}
 		
 	}
 
@@ -225,12 +240,39 @@ public class GameView extends SurfaceView {
 		canvas.drawRect(defend.getRect(), white);
 
 	}
-
+	
+	private void drawGameOver(Canvas canvas){
+		Paint white = new Paint();
+		white.setColor(Color.WHITE);
+		white.setAlpha(150);
+		Paint black = new Paint();
+		black.setColor(Color.BLACK);
+		canvas.drawRect(100, 20, currentMap.width - 100, currentMap.height - 20, white);
+		canvas.drawText("GAME OVER!", currentMap.width/2, 100, black);
+		
+		canvas.drawRect(button_menu.getRect(), black);
+		canvas.drawRect(button_retry.getRect(), black);
+	}
+	
+	private void restartGame(){
+		player1.xPos = 30;
+		enemy1.xPos = 400;
+		player1.yPos = 0;
+		enemy1.yPos = 0;
+		player1.health = 5;
+		enemy1.health = 3;
+		score = 0;
+		scoreSubmitted = false;
+	}
+	
+	private void stopGame(){
+		gameViewListener.onStopGame();
+	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		int action = ev.getAction();
 		int actionCode = action & MotionEvent.ACTION_MASK;
-
 		final int maskedAction = action & MotionEvent.ACTION_MASK;
 		if (maskedAction == MotionEvent.ACTION_DOWN
 				|| maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
@@ -258,9 +300,15 @@ public class GameView extends SurfaceView {
 			if (defend.isPressed(x, y, pointerId)) {
 				player1.defend();
 			}
-			Log.d("info",
-					Integer.toString((int) x) + ", "
-							+ Integer.toString((int) y));
+			if (player1.health <= 0){
+				if (button_retry.isPressed(x, y, pointerId)){
+					restartGame();
+					
+				}
+				if (button_menu.isPressed(x, y, pointerId)){
+					stopGame();
+				}
+			}
 		}
 		if (maskedAction == MotionEvent.ACTION_UP
 				|| maskedAction == MotionEvent.ACTION_POINTER_UP) {

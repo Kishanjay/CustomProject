@@ -8,9 +8,9 @@ import android.graphics.Rect;
 
 public class Player {
 	// Control variables
-	private int xPos;
-	private int yPos;
-	private int width, height;
+	public int xPos;
+	public int yPos;
+	public int width, height;
 	private int speedX, speedY;
 	private boolean jumped;
 	public List<Attack> attack;
@@ -26,7 +26,7 @@ public class Player {
 	protected int attackCooldown;
 	
 	//visual
-	protected Bitmap b_standing, b_jumping, b_attack, b_defend, b_bullet, b_wall;
+	protected Bitmap b_standing, b_jumping, b_attack, b_defend, b_bullet, b_wall, b_dead;
 	protected List<Bitmap> b_running = new ArrayList<Bitmap>();
 	private int frameNumber, lastAttackFrameNumber, lastDefendFrameNumber;
 	private int b_runningDelay = 10;
@@ -198,6 +198,10 @@ public class Player {
 		health --;
 		xPos = xPos + 2 * dir;
 		
+	}
+	
+	public void onShake(){
+		xPos = GameView.currentMap.width - xPos;
 	}
 
 	public Rect getRect() {

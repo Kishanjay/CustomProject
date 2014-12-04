@@ -40,10 +40,15 @@ public class DBHelper extends SQLiteOpenHelper {
 		db.insert("scores", null, contentValues);
 		return true;
 	}
+	
+	public void clearDatabase(){
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.execSQL("DELETE * FROM scores");
+	}
 
 	public Cursor getData() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor result = db.rawQuery("select * from scores",
+		Cursor result = db.rawQuery("SELECT * FROM scores ORDER BY score DESC",
 				null);
 		return result;
 	}

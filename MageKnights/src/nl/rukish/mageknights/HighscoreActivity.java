@@ -32,63 +32,28 @@ public class HighscoreActivity extends ActionBarActivity {
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
-		Intent intent = getIntent();
-		int score = intent.getIntExtra("score", 0);
-		
-		if (score > 0)
-			submitNewScore(score);
-		
 		setContentView(R.layout.activity_highscore);
 		mydb = new DBHelper(this);
 		
 		// Find the ListView resource.   
 	    mainListView = (ListView) findViewById( R.id.mainListView );  
 	     
-	    ArrayList<String> planetList = new ArrayList<String>();  
-	      
-	    // Create ArrayAdapter using the planet list.  
-	    listAdapter = new ArrayAdapter<String>(this, R.layout.highscore_row, planetList);  
-	      
-	    // Add more planets. If you passed a String[] instead of a List<String>   
-	    // into the ArrayAdapter constructor, you must not add more items.   
-	    // Otherwise an exception will occur.  
+	    ArrayList<String> scoreList = new ArrayList<String>();  
+	        
+	    listAdapter = new ArrayAdapter<String>(this, R.layout.highscore_row, scoreList);  
+
 	    Cursor result = mydb.getData();
 	    
 	    result.moveToFirst();
+	    int indexCounter = 1;
 	      while(result.isAfterLast() == false){
-	    	  listAdapter.add(result.getString(0) + ". " + result.getString(1) + result.getString(2));  
+	    	  listAdapter.add(indexCounter + ". " + result.getString(1) + result.getString(2));  
 	    	  result.moveToNext();
+	    	  indexCounter++;
 	      }
 	      
 	    // Set the ArrayAdapter as the ListView's adapter.  
 	    mainListView.setAdapter( listAdapter );
-	}
-	
-	public void submitNewScore(final int score){
-	    AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-	    alert.setTitle("Congratulations");
-	    alert.setMessage("U scored x, please enter your name:");
-
-	    // Set an EditText view to get user input 
-	    final EditText input = new EditText(this);
-	    alert.setView(input);
-
-	    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-	    public void onClick(DialogInterface dialog, int whichButton) {
-	      String value = input.getText().toString();
-	      // Do something with value!
-	      	mydb.insertScore(value, score);
-	      }
-	    });
-
-	    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	      public void onClick(DialogInterface dialog, int whichButton) {
-	        // Canceled.
-	      }
-	    });
-
-	    alert.show();
 	}
 
 	@Override
