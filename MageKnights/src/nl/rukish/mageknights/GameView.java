@@ -34,9 +34,9 @@ public class GameView extends SurfaceView {
 	private Button left, right, attack, defend, jump;
 	private Button button_menu, button_retry;
 
-	static Player player1;
+	public static Player player1;
 	static Map currentMap;
-	static Enemy enemy1;
+	public static Enemy enemy1;
 	static int score;
 	static Bitmap spriteSheet, spriteSheet2, background;
 	static Rect screenRect;
