@@ -26,7 +26,7 @@ public class MainMenu extends ActionBarActivity {
 		
 		setContentView(R.layout.activity_main_menu);
 		showUserName();
-		//startGame(null);
+		startGame(null);
 		//showHighscores(null);
 	}
 

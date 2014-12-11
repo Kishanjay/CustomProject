@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import nl.rukish.mageknights.framework.Attack;
+import nl.rukish.mageknights.framework.GameMap;
+import nl.rukish.mageknights.framework.Character;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -26,47 +30,65 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 
 public class GameView extends SurfaceView {
-	private SurfaceHolder holder;
-	GameLoopThread gameLoopThread;
-	AssetManager assetManager;
-	GameViewListener gameViewListener;
+	// scaling variables
+	private final int CANVAS_WIDTH = 570;
+	private final int CANVAS_HEIGHT = 330;
 
+	// important stuff
+	private SurfaceHolder holder; // used to draw the canvas
+	private GameLoopThread gameLoopThread; // the heartbeat of the game
+	private AssetManager assetManager; // used to load files
+	private GameViewListener gameViewListener; // used to call functions of the gameActivity class
+
+	// The visual buttons the game uses
 	private Button left, right, attack, defend, jump;
-	private Button button_menu, button_retry;
+	private Button button_menu, button_retry, button_pause, button_resume;
 
-	public static Player player1;
-	static Map currentMap;
-	public static Enemy enemy1;
-	static int score;
-	static Bitmap spriteSheet, spriteSheet2, background;
-	static Rect screenRect;
+	private static Player player1;
+	private static Enemy enemy1;
+
+	private static GameMap gameMap;
+	private static int score;
+
+	//bitmaps
+	private Bitmap spriteSheet, spriteSheet2, background; //backgrounds
+	private Bitmap bo_gameover, bo_pause; //overlays
+	private Bitmap b_menu, b_retry, bc_resume, bc_pause; //buttons
+	private Bitmap bi_heart1, bi_heart2; //icons
 	
-	private boolean scoreSubmitted;
+	// helper variables
+	private boolean scoreSubmitted, paused;
+	
+	private Paint BLUEPAINT, REDPAINT, BLACKPAINT30, BLACKPAINT25, WHITEPAINT, TRANSPAINT;
 
+	//rectangle of the current screen
+	private static Rect screenRect;
+
+	
 	public GameView(Context context) {
 		super(context);
-		
+
 		gameViewListener = (GameViewListener) context;
-		
 		gameLoopThread = new GameLoopThread(this);
 		assetManager = context.getAssets();
 
 		createMap(context);
-		initVariables();
+		initFunctional(); // sets all functional variables
+		initVisual(); // sets all visual variables
 
+		// start/stop the gameloop
 		holder = getHolder();
+		holder.setFixedSize(570, 330);
 		holder.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
 				gameLoopThread.setRunning(false);
 			}
-
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
 				gameLoopThread.setRunning(true);
 				gameLoopThread.start();
 			}
-
 			@Override
 			public void surfaceChanged(SurfaceHolder holder, int format,
 					int width, int height) {
@@ -75,26 +97,28 @@ public class GameView extends SurfaceView {
 		});
 	}
 
-	private void initVariables() {
-		screenRect = currentMap.getRect();
-		enemy1 = new Enemy(200, 200, 40, 60);
-
-		player1 = new Player(100, 200, 40, 60);
-		left = new Button(10, currentMap.height - 110, 110, 100);
-		right = new Button(140, currentMap.height - 110, 110, 100);
-		jump = new Button(currentMap.width - 200, currentMap.height - 110, 80,
-				80);
-		attack = new Button(currentMap.width - 100, currentMap.height - 110,
-				80, 80);
-		defend = new Button(currentMap.width - 100, currentMap.height - 200,
-				80, 80);
-
+	private void initFunctional() {
+		// init values
 		score = 0;
 		scoreSubmitted = false;
-		
-		button_retry = new Button(200, 400, 200, 50);
-		button_menu = new Button(450, 400, 200, 50);
+		paused = false;
 
+		screenRect = GameMap.getRect();
+
+		// create players
+		player1 = new Player(100, 200);
+		enemy1 = new Enemy(GameMap.getMapWidth()-100, 200);
+
+		// create buttons
+		left = new Button(10, GameMap.getMapHeight() - 110, 110, 100);
+		right = new Button(140, GameMap.getMapHeight() - 110, 110, 100);
+		jump = new Button(GameMap.getMapWidth() - 200, GameMap.getMapHeight() - 110, 80, 80);
+		attack = new Button(GameMap.getMapWidth() - 100, GameMap.getMapHeight() - 110, 80, 80);
+		defend = new Button(GameMap.getMapWidth() - 100, GameMap.getMapHeight() - 200, 80, 80);
+	}
+	
+	private void initVisual(){
+		// load sprite sheets and create images for characters
 		InputStream in = null;
 		try {
 			in = assetManager.open("spriteSheet.png");
@@ -103,125 +127,157 @@ public class GameView extends SurfaceView {
 			spriteSheet2 = BitmapFactory.decodeStream(in);
 			in = assetManager.open("background.png");
 			background = BitmapFactory.decodeStream(in);
+			in = assetManager.open("overlay_gameover.png");
+			bo_gameover = BitmapFactory.decodeStream(in);
+			in = assetManager.open("overlay_pause.png");
+			bo_pause = BitmapFactory.decodeStream(in);
+			in = assetManager.open("button_menu.png");
+			b_menu = BitmapFactory.decodeStream(in);
+			in = assetManager.open("button_retry.png");
+			b_retry = BitmapFactory.decodeStream(in);
+			in = assetManager.open("button_resume.png");
+			bc_resume = BitmapFactory.decodeStream(in);
+			in = assetManager.open("button_pause.png");
+			bc_pause = BitmapFactory.decodeStream(in);
+			in = assetManager.open("icon_heart1.png");
+			bi_heart1 = BitmapFactory.decodeStream(in);
+			in = assetManager.open("icon_heart2.png");
+			bi_heart2 = BitmapFactory.decodeStream(in);
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		player1.b_standing = Bitmap.createBitmap(spriteSheet, 60, 0, 15, 35);
-		player1.b_running.add(Bitmap.createBitmap(spriteSheet, 65, 40, 30, 30));
-		player1.b_running.add(Bitmap.createBitmap(spriteSheet, 95, 40, 30, 30));
-		player1.b_running.add(Bitmap.createBitmap(spriteSheet, 125, 40, 30, 30));
-		player1.b_jumping = Bitmap.createBitmap(spriteSheet, 130, 80, 20, 40);
-		player1.b_attack = Bitmap.createBitmap(spriteSheet, 130, 180, 31, 36);
-		player1.b_defend = Bitmap.createBitmap(spriteSheet, 182, 473, 28, 32);
-		player1.b_bullet = Bitmap.createBitmap(spriteSheet, 315, 250, 25, 15);
-		player1.b_wall = Bitmap.createBitmap(spriteSheet, 207, 120, 32, 48);
-		player1.b_dead = Bitmap.createBitmap(spriteSheet, 158, 961, 34, 19);
 		
-		enemy1.b_standing = Bitmap.createBitmap(spriteSheet2, 67, 3, 25, 40);
-		enemy1.b_running.add(Bitmap.createBitmap(spriteSheet2, 60, 54, 37, 53));
-		enemy1.b_running.add(Bitmap.createBitmap(spriteSheet2, 106, 55, 26, 56));
-		enemy1.b_running.add(Bitmap.createBitmap(spriteSheet2, 145, 55, 38, 52));
-		enemy1.b_jumping = Bitmap.createBitmap(spriteSheet2, 115, 129, 30, 40);
-		enemy1.b_attack = Bitmap.createBitmap(spriteSheet2, 117, 503, 33, 37);
-		enemy1.b_bullet = Bitmap.createBitmap(spriteSheet2, 291, 514, 17, 17);
+		button_menu = new Button(320, 130, b_menu);
+		button_retry = new Button(140, 130, b_retry);
+		button_resume = new Button(10, 10, bc_resume);
+		button_pause = new Button(10,10, bc_pause);
+		
+		player1.parseSpritesheet(spriteSheet);
+		enemy1.parseSpritesheet(spriteSheet2);
+
+		REDPAINT = new Paint();
+		BLUEPAINT = new Paint();
+		BLACKPAINT30 = new Paint();
+		BLACKPAINT25 = new Paint();
+		WHITEPAINT = new Paint();
+		TRANSPAINT = new Paint();
+		REDPAINT.setColor(Color.RED);
+		BLUEPAINT.setColor(Color.BLUE);
+		BLACKPAINT30.setColor(Color.BLACK);
+		BLACKPAINT30.setTextSize(30); //used for writing
+		BLACKPAINT25.setColor(Color.BLACK);
+		BLACKPAINT25.setTextSize(25);
+		WHITEPAINT.setColor(Color.WHITE);
+		TRANSPAINT.setARGB(200, 0, 0, 0); //transparent
 		
 	}
 
 	private void createMap(Context context) {
-		WindowManager wm = (WindowManager) context
-				.getSystemService(Context.WINDOW_SERVICE);
+		// get screen dimensions
+		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
 		int width = size.x;
 		int height = size.y;
 
-		currentMap = new Map(width, height);
-		// currentMap.addSquareToMap();
-		currentMap
-				.addPlatform(0, currentMap.height - 50, currentMap.width, 150); // floor
-		currentMap.addPlatform(280, currentMap.height - 170, 300, 50); // middle
-		currentMap.addPlatform(600, currentMap.height - 300, 200, 50); // right
-		currentMap.addPlatform(60, currentMap.height - 300, 200, 50); // left
+		gameMap = new GameMap(CANVAS_WIDTH, CANVAS_HEIGHT, width, height);
+
+		gameMap.addPlatform(-50, GameMap.getMapHeight() - 30, GameMap.getMapWidth()+50, 100); // floor
+		gameMap.addPlatform(GameMap.getMapWidth() / 2 - 150, GameMap.getMapHeight() - 110, 300, 30); // middle
+		gameMap.addPlatform(50, GameMap.getMapHeight() - 200, 150, 30); // left
+		gameMap.addPlatform(GameMap.getMapWidth() - 200, GameMap.getMapHeight() - 200, 150, 30); // right
 	}
 
 	public void update() {
-		player1.update();
-		enemy1.updateEnemy();
+		if (!isPaused()){
+			player1.update();
+			enemy1.update();
+		}
+		if (isGameOver()){
+			if (!scoreSubmitted){
+				gameViewListener.onSubmitScore(score);
+				scoreSubmitted = true;
+			}
+		}	
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		//canvas.drawColor(Color.BLACK); // background color
+		//draw the background
 		canvas.drawBitmap(background, null, screenRect, null);
-		Paint blue = new Paint();
-		blue.setColor(Color.BLUE);
-		Paint red = new Paint();
-		red.setColor(Color.RED);
 
+		//draw all of the platforms
 		drawMap(canvas);
+		
+		//draw the playbuttons
 		drawButtons(canvas);
 
-		canvas.drawText(
-				"FPS: " + Integer.toString((int) GameLoopThread.currentFPS),
-				800, 40, blue);
-		canvas.drawText("Score: " + Integer.toString(score), 600, 40, blue);
+		//draws some gameinfo
+		canvas.drawText("FPS: " + Integer.toString((int) GameLoopThread.currentFPS), GameMap.getMapWidth() - 50, 70, REDPAINT);
+		canvas.drawText("Score: " + Integer.toString(score), GameMap.getMapWidth() - 130, 40, BLACKPAINT30);
 
-		// Player draw stuff
-		//canvas.drawRect(player1.getRect(), blue);
+		drawPlayer(canvas);
+		drawEnemy(canvas);
 		
-		if (player1.health > 0)
-			canvas.drawBitmap((player1.getBitmap()), null, player1.getRect(), null);
-		else
-			canvas.drawBitmap(player1.b_dead, player1.getRect().left, player1.getRect().top, null);
-		//Rect dead = new Rect(player1.getRect().left, player1.getRect().top,player1.getRect().left + 34, player1.getRect().top + 19);
-		List<Attack> attacks = player1.attack;
-		for (int i = 0; i < attacks.size(); i++) {
-			Attack att = (Attack) attacks.get(i);
-			canvas.drawRect(att.getRect(), blue);
-			canvas.drawBitmap((player1.b_bullet), null, att.getRect(), null);
+		//on gameover (visual)
+		if (isGameOver()){
+			drawGameOver(canvas); 
 		}
-		if (player1.defend != null && player1.defend.isVisible()){
-			//canvas.drawRect(player1.defend.getRect(), blue);
-			canvas.drawBitmap((player1.b_wall), null, player1.defend.getRect(), null);
+		else if (isPaused()){
+			drawPause(canvas);
 		}
-		for (int i = 0; i < player1.getHealth(); i++) {
-			canvas.drawRect(30 + (i * 40), 20, 60 + (i * 40), 50, red);
-		}
-
-		// Enemy draw stuff
-		if (enemy1.isVisible()){
-			//canvas.drawRect(enemy1.getRect(), red);
-			canvas.drawBitmap((enemy1.getBitmap()), null, enemy1.getRect(), null);
-		}
-		attacks = enemy1.attack;
-		for (int i = 0; i < attacks.size(); i++) {
-			Attack att = (Attack) attacks.get(i);
-			canvas.drawRect(att.getRect(), red);
-			canvas.drawBitmap((enemy1.b_bullet), null, att.getRect(), null);
-		}
-		for (int i = 0; i < enemy1.getHealth(); i++) {
-			canvas.drawRect(330 + (i * 40), 20, 360 + (i * 40), 50, blue);
-		}
-
-		if (player1.health <= 0){
-			drawGameOver(canvas);
-			if (!scoreSubmitted){
-				scoreSubmitted = true;
-				gameViewListener.onSubmitScore(score);
-			}
-			
-		}
-		
 	}
+	
+	private void drawPlayer(Canvas canvas) {
+		//draws the actual character
+		if (player1.isVisible()){
+			canvas.drawBitmap(player1.getBitmap(), player1.getRect().left, player1.getRect().top, null);
+		}
 
+		//draw all of the attack of the player
+		 List<Attack> attacks = player1.getAttack(); 
+		 for (int i = 0; i < attacks.size(); i++) {
+			 Attack att = (Attack) attacks.get(i);
+			 canvas.drawRect(att.getRect(), BLUEPAINT); 
+			 canvas.drawBitmap((player1.getB_bullet()), null, att.getRect(), null);
+		 } 
+		 //draw the defend block
+		 if (player1.getDefend() != null && player1.getDefend().isVisible()){
+			 canvas.drawBitmap((player1.getB_wall()), null, player1.getDefend().getRect(), null); 
+		 } 
+		 //draw the health
+		 for (int i = 0; i < player1.getHealth(); i++) {
+			 canvas.drawBitmap(bi_heart1, 70 + 33*i, 10, TRANSPAINT);
+		 }
+	}
+	
+	private void drawEnemy(Canvas canvas){
+		//draw the character
+		if (enemy1.isVisible()) {
+			canvas.drawBitmap(enemy1.getBitmap(), enemy1.getRect().left, enemy1.getRect().top, null);
+		}
+		
+		//draw all of the attacks
+		List<Attack> attacks = enemy1.getAttack(); 
+		for (int i = 0; i < attacks.size(); i++) {
+			Attack att = (Attack) attacks.get(i); 
+			canvas.drawBitmap((enemy1.getB_bullet()), null, att.getRect(), null);
+		} 
+		//draw the health
+		for (int i = 0; i < enemy1.getHealth(); i++) {
+			canvas.drawBitmap(bi_heart2, 400 - 33*i, 10, TRANSPAINT);
+		}
+
+	}
+	
 	private void drawMap(Canvas canvas) {
 		Paint white = new Paint();
 		white.setColor(Color.WHITE);
 
-		List<Rect> map = currentMap.getMap();
+		List<Rect> map = GameMap.getMap();
 
 		for (int i = 0; i < map.size(); i++) {
 			Rect rect = (Rect) map.get(i);
@@ -238,37 +294,72 @@ public class GameView extends SurfaceView {
 		canvas.drawRect(jump.getRect(), white);
 		canvas.drawRect(attack.getRect(), white);
 		canvas.drawRect(defend.getRect(), white);
+		
+		//button in the leftup corner
+		if (isPaused()){
+			canvas.drawBitmap(bc_resume, null, button_resume.getRect(), TRANSPAINT);
+		}
+		else {
+			canvas.drawBitmap(bc_pause, null, button_pause.getRect(), TRANSPAINT);
+		}
 
 	}
-	
-	private void drawGameOver(Canvas canvas){
-		Paint white = new Paint();
-		white.setColor(Color.WHITE);
-		white.setAlpha(150);
-		Paint black = new Paint();
-		black.setColor(Color.BLACK);
-		canvas.drawRect(100, 20, currentMap.width - 100, currentMap.height - 20, white);
-		canvas.drawText("GAME OVER!", currentMap.width/2, 100, black);
+
+	private void drawGameOver(Canvas canvas) {
+		int highscore = gameViewListener.getHighScore();
 		
-		canvas.drawRect(button_menu.getRect(), black);
-		canvas.drawRect(button_retry.getRect(), black);
+		canvas.drawBitmap(bo_gameover, 100, 50, TRANSPAINT);
+
+		canvas.drawBitmap(b_retry, null, button_retry.getRect(), TRANSPAINT);
+		canvas.drawBitmap(b_menu, null, button_menu.getRect(), TRANSPAINT);
+		
+		canvas.drawText("Score: " + score, 210, 220, BLACKPAINT30);
+		canvas.drawText("Highscore: " + highscore, 210, 250, BLACKPAINT25);
 	}
 	
-	private void restartGame(){
-		player1.xPos = 30;
-		enemy1.xPos = 400;
-		player1.yPos = 0;
-		enemy1.yPos = 0;
-		player1.health = 5;
-		enemy1.health = 3;
+	private void drawPause(Canvas canvas){
+		canvas.drawBitmap(bo_pause, 100, 50, TRANSPAINT);
+		canvas.drawBitmap(b_retry, null, button_retry.getRect(), TRANSPAINT);
+		canvas.drawBitmap(b_menu, null, button_menu.getRect(), TRANSPAINT);
+	}
+
+	// Gamefunctions
+	private void restartGame() {
 		score = 0;
 		scoreSubmitted = false;
+		
+		getPlayer1().spawn();
+		getEnemy1().spawn();
+		paused = false;
 	}
-	
-	private void stopGame(){
+
+	private void stopGame() {
 		gameViewListener.onStopGame();
 	}
 	
+	private void togglePause() {
+		if (isPaused()){
+			paused = false;
+		}
+		else {
+			paused = true;
+		}
+	}
+	
+	public static void increaseScore(){
+		score++;
+	}
+	
+	private boolean isPaused(){
+		return paused;
+	}
+	
+	private boolean isGameOver(){
+		return getPlayer1().isDead();
+	}
+	
+
+	// Touch sensor stuff
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		int action = ev.getAction();
@@ -282,8 +373,8 @@ public class GameView extends SurfaceView {
 				player1.stop();
 				return true;
 			}
-			final float x = ev.getX(pointerId);
-			final float y = ev.getY(pointerId);
+			final float x = GameMap.scaleX(ev.getX(pointerId));
+			final float y = GameMap.scaleY(ev.getY(pointerId));
 
 			if (left.isPressed(x, y, pointerId)) {
 				player1.moveLeft();
@@ -300,14 +391,16 @@ public class GameView extends SurfaceView {
 			if (defend.isPressed(x, y, pointerId)) {
 				player1.defend();
 			}
-			if (player1.health <= 0){
-				if (button_retry.isPressed(x, y, pointerId)){
-					restartGame();
-					
-				}
-				if (button_menu.isPressed(x, y, pointerId)){
+			if (player1.isDead() || isPaused()) {
+				if (button_menu.isPressed(x, y, pointerId)) {
 					stopGame();
 				}
+				if (button_retry.isPressed(x, y, pointerId)) {
+					restartGame();
+				}
+			}
+			if (button_pause.isPressed(x, y, pointerId) || button_resume.isPressed(x, y, pointerId)){
+				togglePause();
 			}
 		}
 		if (maskedAction == MotionEvent.ACTION_UP
@@ -318,8 +411,8 @@ public class GameView extends SurfaceView {
 				player1.stop();
 				return true;
 			}
-			final float x = ev.getX(pointerId);
-			final float y = ev.getY(pointerId);
+			final float x = GameMap.scaleX(ev.getX(pointerId));
+			final float y = GameMap.scaleY(ev.getY(pointerId));
 
 			if (left.isTouched()) {
 				if (left.isReleased(pointerId)) {
@@ -339,8 +432,8 @@ public class GameView extends SurfaceView {
 				player1.stop();
 				return true;
 			}
-			final float x = ev.getX(pointerId);
-			final float y = ev.getY(pointerId);
+			final float x = GameMap.scaleX(ev.getX(pointerId));
+			final float y = GameMap.scaleY(ev.getY(pointerId));
 
 			if (left.isTouched() && left.getPointerId() == pointerId) {
 				// check if isStillTouched()
@@ -370,6 +463,7 @@ public class GameView extends SurfaceView {
 		return true;
 	}
 
+	// horizontal flip of bitmap
 	public static Bitmap flipBitmap(Bitmap src) {
 		Matrix m = new Matrix();
 		m.preScale(-1, 1);
@@ -378,26 +472,20 @@ public class GameView extends SurfaceView {
 		dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
 		return dst;
 	}
-
-	public static Bitmap makeTransparent(Bitmap bit) {
-		int width = bit.getWidth();
-		int height = bit.getHeight();
-		Bitmap myBitmap = Bitmap.createBitmap(width, height,
-				Bitmap.Config.ARGB_8888);
-		int[] allpixels = new int[myBitmap.getHeight() * myBitmap.getWidth()];
-		bit.getPixels(allpixels, 0, myBitmap.getWidth(), 0, 0,
-				myBitmap.getWidth(), myBitmap.getHeight());
-		myBitmap.setPixels(allpixels, 0, width, 0, 0, width, height);
-
-		for (int i = 0; i < myBitmap.getHeight() * myBitmap.getWidth(); i++) {
-			if (allpixels[i] == Color.RED)
-
-				allpixels[i] = Color.alpha(Color.TRANSPARENT);
-		}
-
-		myBitmap.setPixels(allpixels, 0, myBitmap.getWidth(), 0, 0,
-				myBitmap.getWidth(), myBitmap.getHeight());
-		Log.d("Supports alpha?", myBitmap.hasAlpha() + "");
-		return myBitmap;
+	
+	//Getters and Setters
+	public static Character getPlayer1() {
+		return player1;
+	}
+	
+	public static Character getEnemy1() {
+		return enemy1;
+	}
+	
+	public static List<Character> getCharacters(){
+		List<Character> gameCharacters = null;
+		gameCharacters.add(player1);
+		gameCharacters.add(enemy1);
+		return gameCharacters;
 	}
 }

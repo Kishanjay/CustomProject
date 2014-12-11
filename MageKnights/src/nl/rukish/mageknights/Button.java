@@ -1,5 +1,6 @@
 package nl.rukish.mageknights;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 public class Button {
@@ -15,6 +16,10 @@ public class Button {
 		this.width = width;
 		this.height = height;
 		isTouched = false;
+	}
+	
+	public Button(int xPos, int yPos, Bitmap b_button){
+		this(xPos, yPos, b_button.getWidth(), b_button.getHeight());
 	}
 	
 	public Rect getRect(){

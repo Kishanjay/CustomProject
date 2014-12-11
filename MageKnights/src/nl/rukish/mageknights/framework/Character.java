@@ -2,6 +2,7 @@ package nl.rukish.mageknights.framework;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import nl.rukish.mageknights.DefendAttack;
 import nl.rukish.mageknights.GameView;
@@ -13,7 +14,7 @@ import android.graphics.Rect;
 public class Character {
 	// Properties
 	private int width, height;
-	private int health;
+	private int totalHealth;
 	
 	// Powers
 	protected int movingSpeed;
@@ -22,16 +23,17 @@ public class Character {
 	protected int defendDelay;
 	
 	// Control variables
-	private int xPos;
-	private int yPos;
+	private int xPos; //left
+	private int yPos; //bottom
 	private int speedX, speedY;
 	private boolean jumped;
+	private int currentHealth;
 	
 	 // 1 is right -1 is left
 	private int direction;
 	
 	//time left until a character can do another attack/defend
-	private int attackCooldown;
+	protected int attackCooldown;
 	private int defendCooldown;
 
 	// list of attacks
@@ -39,29 +41,30 @@ public class Character {
 	private Attack defend;
 	
 	// visual
-	protected Bitmap b_standing, b_jumping, b_attack, b_defend, b_bullet, b_wall, b_dead;
+	protected Bitmap b_standing, b_jumping, b_attack, b_defend;
+	private Bitmap b_bullet;
+	private Bitmap b_wall;
+	private Bitmap b_dead;
 	protected List<Bitmap> b_running = new ArrayList<Bitmap>();
 	private int frameNumber, lastAttackFrameNumber, lastDefendFrameNumber;
 	private int b_runningDelay = 10;
 	//visibility of the character
 	private boolean visible;
 
-	public Character(int xPos, int yPos, int width, int height) {
-		this.xPos = xPos;
-		this.yPos = yPos;
+	
+	public Character(int xPos, int yPos, int width, int height, int health) {
 		this.width = width;
 		this.height = height;
+		this.totalHealth = health;
 		
 		// default powers
 		movingSpeed = 5; 
-		jumpingPower = 17;
+		jumpingPower = 14;
 		attackDelay = 30;
 		
 		// init values
-		visible = true;
 		jumped = false;
 		direction = 1;
-		health = 1;
 		attack = new ArrayList<Attack>();
 		
 		// graphic stuff
@@ -69,14 +72,41 @@ public class Character {
 		attackCooldown = 0;
 		lastAttackFrameNumber = 0;
 		lastDefendFrameNumber = 0;
+		
+		spawn(xPos, yPos);
 	}
 
+	public void spawn() {
+		spawn(GameMap.getRandomX(), 0);
+	}
+	
+	public void spawn(int xPos, int yPos) {
+		this.xPos = xPos;
+		this.yPos = yPos;
+		currentHealth = totalHealth;
+		visible = true;
+		jumped = false;
+	}
+	
+	public void upgrade() {
+		if (attackDelay > 5){
+			attackDelay--;
+		}
+		else if (movingSpeed < 10){
+			movingSpeed++;
+		}
+		else {
+			totalHealth++;
+		}
+	}
+	
 	public void update() {
 		//current framenumber
 		frameNumber++; 
 		
 		// update attack stuff
-		attackCooldown--;
+		attackCooldown--;		
+
 		for (int i = 0; i < attack.size(); i++) {
 			Attack att = (Attack) attack.get(i);
 			if (att.isVisible())
@@ -84,47 +114,54 @@ public class Character {
 			else
 				attack.remove(i);
 		}
-		if (defend.isVisible()){
+		
+		if (defend != null && defend.isVisible()){
 			defend.update();
 		}
 		
 		// update character
 		speedY += 1; //gravity
-		xPos += speedX;
-		yPos += speedY;
+		setxPos(getxPos() + speedX);
+		setyPos(getyPos() + speedY);
 		
-		// let player walk on platforms
-		checkMapCollisions();
-		// keeps player inside screen
-		checkScreenCollisions(); 
 		// prohibits jumping when falling
 		if (speedY > 3) {
 			jumped = true;
 		}
 
+		// let player walk on platforms
+		checkMapCollisions();
+		// keeps player inside screen
+		checkScreenCollisions();
+		
+		//check if player had died
+		if (isDead()){
+			speedX = 0;
+		}
 	}
 
 	private void checkScreenCollisions() {
 		// left map bound
-		if (xPos < 0) {
-			xPos = 0;
+		if (getxPos() < 0) {
+			setxPos(0);
 			// speedX = 0;
 		}
 		// right map bound
-		if (xPos > GameMap.getMapWidth() - width) {
-			xPos = GameMap.getMapWidth() - width;
+		if (getxPos() > GameMap.getMapWidth() - getWidth()) {
+			setxPos(GameMap.getMapWidth() - getWidth());
 			// speedX = 0;
 		}
 		// up map bound
-		if (yPos < 0) {
-			yPos = 0;
+		if (getyPos()-getHeight() < 0) {
+			setyPos(0 + getHeight());
 			speedY = 0;
 		}
-		// down map bound (we use a floor instead)
-		// if (yPos > currentMap.height-height){
-		// yPos = currentMap.height-height;
-		// speedY = 0;
-		// }
+		
+		//down map bound (we also use a floor)
+		if (yPos > GameMap.getMapHeight()){
+			yPos = GameMap.getMapHeight();
+			speedY = 0;
+		}
 	}
 
 	// returns a true is a rectangle intersects this object
@@ -147,24 +184,26 @@ public class Character {
 		for (int i = 0; i < floors.size(); i++) {
 			Rect floor = (Rect) floors.get(i);
 			if (speedY > 0 //We are falling 
-				&& characterRect.bottom - speedY <= floor.top //the bottom from our char is already inside the top of the floor
+				&& characterRect.bottom - speedY - 10 <= floor.top // the character is comming from above the floor
 				&& intersectCharacter(floor)) //our character intersects the floor
 			{
 				if (speedY > 0) // reset falling speed to 0
 					speedY = 0;
 				jumped = false; // we can now jump again
-				yPos = floor.top - height; // reset the yPos of our character
+				setyPos(floor.top); // reset the yPos of our character
 			}
 		}
 		
 		// character cannot walk through defend blocks
-		if (GameView.player1.defend != null && GameView.player1.defend.isVisible()){
-			Rect defRect = GameView.player1.defend.getRect();
+		Character player1 = GameView.getPlayer1();
+		Attack defend = player1.getDefend();
+		if (defend != null && defend.isVisible()){
+			Rect defRect = defend.getRect();
 			if (intersectCharacter(defRect)){
 				if (speedX > 0 && defRect.top < characterRect.bottom - 15)
-					xPos = defRect.left - width;
+					setxPos(defRect.left - width);
 				if (speedX < 0 && defRect.top < characterRect.bottom - 15)
-					xPos = defRect.right;
+					setxPos(defRect.right);
 				/* // lets users stand on a defend block
 				if (speedY > 1 && defRect.top > characterRect.bottom - 15){
 					yPos = defRect.top - height;
@@ -178,18 +217,22 @@ public class Character {
 	}
 
 	public void moveLeft() {
-		direction = -1;
-		speedX = -movingSpeed;
+		if (!isDead()){
+			direction = -1;
+			speedX = -movingSpeed;
+		}
 	}
 
 	public void moveRight() {
-		direction = 1;
-		speedX = movingSpeed;
+		if (!isDead()){
+			direction = 1;
+			speedX = movingSpeed;
+		}
 	}
 	
 	public void moveTo(int x, int y){
-		xPos = x;
-		yPos = y;
+		setxPos(x);
+		setyPos(y);
 	}
 
 	public void stop() {
@@ -197,15 +240,15 @@ public class Character {
 	}
 
 	public void jump() {
-		if (jumped == false) {
+		if (jumped == false && !isDead()) {
 			speedY = -jumpingPower;
 			jumped = true;
 		}
 	}
 
 	public void attack() {
-		if (attackCooldown <= 0){
-			attack.add(new RangedAttack(xPos + width/2, yPos + height / 2, direction));
+		if (attackCooldown <= 0 && !isDead()){
+			attack.add(new RangedAttack(getxPos() + getWidth()/2, getyPos() - getHeight() / 2, direction, hashCode()));
 			attackCooldown = attackDelay;
 			lastAttackFrameNumber = frameNumber;
 		}
@@ -213,39 +256,85 @@ public class Character {
 	}
 	
 	public void defend(){
-		defend = new DefendAttack(xPos + width/2, yPos + height, direction);
-		lastDefendFrameNumber = frameNumber;
+		if (!isDead()){
+			defend = new DefendAttack(getxPos() + getWidth()/2, getyPos(), direction, hashCode());
+			lastDefendFrameNumber = frameNumber;
+		}
 	}
 	
 	public void hit(int dir){
 		//got hit
-		health --;
-		xPos = xPos + 2 * dir;
+		currentHealth --;
+		setxPos(getxPos() + 2 * dir);
 	}
 	
 	public void onShake(){
-		mirrorTeleport();
+		if (!isDead()){
+			mirrorTeleport();
+		}
 	}
 	
 	public void mirrorTeleport(){
-		xPos = GameMap.getMapWidth() - (xPos + width/2);
+		setxPos(GameMap.getMapWidth() - (xPos + width/2));
+		direction *=-1; //face the otherway
 	}
 
 	public Rect getRect() {
-		Rect rect = new Rect(xPos, yPos, xPos + width, yPos + height);
+		//Rect imgRect = getBitmap();
+		Rect rect = new Rect(xPos, yPos - getHeight(), xPos + getWidth(), yPos);
 		return rect;
-	}
-	
-	public int getHealth(){
-		return health;
 	}
 
 	public int getWidth(){
-		return width;
+		return getBitmap().getWidth();
+	}
+	
+	public int getHeight(){
+		return getBitmap().getHeight();
+	}
+
+	public int getxPos() {
+		return xPos;
+	}
+
+	public void setxPos(int xPos) {
+		this.xPos = xPos;
+	}
+	
+	public int getyPos() {
+		return yPos;
+	}
+
+	public void setyPos(int yPos) {
+		this.yPos = yPos;
+	}
+
+	public int getHealth(){
+		return currentHealth;
+	}
+	
+	public void setHealth(int health){
+		this.currentHealth = health;
+	}
+	
+	public Attack getDefend(){
+		return defend;
+	}
+	
+	public List<Attack> getAttack(){
+		return attack;
+	}
+	
+	public boolean isDead(){
+		return currentHealth <= 0;
 	}
 	
 	public boolean isVisible(){
 		return visible;
+	}
+	
+	public void setVisible(boolean val){
+		visible = val;
 	}
 	
 	public Bitmap getBitmap(){
@@ -265,6 +354,9 @@ public class Character {
 		}
 		else {
 			bmp = b_running.get((frameNumber % (b_running.size()*b_runningDelay))/b_runningDelay);
+		}
+		if (isDead()){
+			bmp = b_dead;
 		}
 		if (direction == -1){
 			return (GameView.flipBitmap(bmp));
@@ -305,4 +397,33 @@ public class Character {
 	public void setB_defend(Bitmap b_defend) {
 		this.b_defend = b_defend;
 	}
+	
+	public void addB_running(Bitmap b_running) {
+		this.b_running.add(b_running);
+	}
+
+	public Bitmap getB_bullet() {
+		return b_bullet;
+	}
+
+	public void setB_bullet(Bitmap b_bullet) {
+		this.b_bullet = b_bullet;
+	}
+
+	public Bitmap getB_wall() {
+		return b_wall;
+	}
+
+	public void setB_wall(Bitmap b_wall) {
+		this.b_wall = b_wall;
+	}
+
+	public Bitmap getB_dead() {
+		return b_dead;
+	}
+
+	public void setB_dead(Bitmap b_dead) {
+		this.b_dead = b_dead;
+	}
+
 }

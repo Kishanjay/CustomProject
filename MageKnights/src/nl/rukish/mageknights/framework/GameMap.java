@@ -2,24 +2,40 @@ package nl.rukish.mageknights.framework;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.graphics.Rect;
 
-public class GameMap {
+/* Game map will consist of all screen information
+ * Variables will be static as there can always be only 1 active gameMap
+ */
 
+public class GameMap {	
 	private static List<Rect> floors;
 	private static List<Rect> ceils;
 	private static List<Rect> walls;
+	
+	//canvas dimensions
 	private static int width;
 	private static int height;
 	
-	public GameMap(int width, int height) {
+	//screen dimensions
+	private static int screen_width;
+	private static int screen_height;
+	
+	private static Random rand;
+	
+	public GameMap(int width, int height, int screen_width, int screen_height) {
 		floors = new ArrayList<Rect>();
 		ceils = new ArrayList<Rect>();
 		walls = new ArrayList<Rect>();
 		
 		this.width = width;
 		this.height = height;
+		this.screen_width = screen_width;
+		this.screen_height = screen_height;
+		
+		rand = new Random();
 	}
 	
 	//Add the width/height bounds to the map
@@ -88,4 +104,29 @@ public class GameMap {
 	public static int getMapHeight(){
 		return height;
 	}
+	
+	public static int getScreenWidth(){
+		return screen_width;
+	}
+	
+	public static int getScreenHeight(){
+		return screen_height;
+	}
+
+	public static float scaleX(float screenX){
+		return width*screenX/screen_width;
+	}
+	
+	public static float scaleY(float screenY){
+		return height*screenY/screen_height;
+	}
+	
+	public static int getRandomX(){
+		return rand.nextInt(getMapWidth());
+	}
+	
+	public static int getRandomY(){
+		return rand.nextInt(getMapHeight());
+	}
+
 }

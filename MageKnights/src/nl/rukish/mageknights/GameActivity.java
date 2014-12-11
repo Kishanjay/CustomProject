@@ -19,7 +19,14 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 public class GameActivity extends ActionBarActivity implements GameViewListener {
-
+	  
+	//Shake sensor stuff
+	private SensorManager mSensorManager;
+	private float mAccel; // acceleration apart from gravity
+	private float mAccelCurrent; // current acceleration including gravity
+	private float mAccelLast; // last acceleration including gravity
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,36 +76,29 @@ public class GameActivity extends ActionBarActivity implements GameViewListener 
 
 	@Override
 	public int getHighScore() {
-		// TODO Auto-generated method stub
-		return 0;
+		DBHelper mydb = new DBHelper(this);
+		return mydb.getHighscore();
 	}
 	
-	/* put this into your activity class */
-	  private SensorManager mSensorManager;
-	  private float mAccel; // acceleration apart from gravity
-	  private float mAccelCurrent; // current acceleration including gravity
-	  private float mAccelLast; // last acceleration including gravity
 
-	  private final SensorEventListener mSensorListener = new SensorEventListener() {
-
-	    public void onSensorChanged(SensorEvent se) {
-	      float x = se.values[0];
-	      float y = se.values[1];
-	      float z = se.values[2];
-	      mAccelLast = mAccelCurrent;
-	      mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
-	      float delta = mAccelCurrent - mAccelLast;
-	      mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-	      
-	      if (mAccel > 6) {
-	    	  	GameView.player1.onShake();
-	    	    mAccel = 0;
-	    	}
-	    }
-
-	    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-	    }
-	  };
+	private final SensorEventListener mSensorListener = new SensorEventListener() {
+		public void onSensorChanged(SensorEvent se) {
+			float x = se.values[0];
+			float y = se.values[1];
+			float z = se.values[2];
+			mAccelLast = mAccelCurrent;
+			mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
+			float delta = mAccelCurrent - mAccelLast;
+			mAccel = mAccel * 0.9f + delta; // perform low-cut filter
+			   
+			if (mAccel > 6) {
+				GameView.getPlayer1().onShake();
+				mAccel = 0;
+			}
+		}
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		}
+	};
 
 	  @Override
 	  protected void onResume() {

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -51,6 +52,17 @@ public class DBHelper extends SQLiteOpenHelper {
 		Cursor result = db.rawQuery("SELECT * FROM scores ORDER BY score DESC",
 				null);
 		return result;
+	}
+	
+	public int getHighscore() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor result = db.rawQuery("SELECT score FROM scores ORDER BY score DESC LIMIT 1", null);
+		result.moveToFirst();
+		//if there is no score
+		if (result.isAfterLast())
+			return 0;
+		//return highest score
+		return result.getInt(0);
 	}
 
 }

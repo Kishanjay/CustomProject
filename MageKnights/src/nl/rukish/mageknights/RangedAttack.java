@@ -3,15 +3,15 @@ package nl.rukish.mageknights;
 import nl.rukish.mageknights.framework.Attack;
 
 public class RangedAttack extends Attack {
-	private static int ra_width = 20;
-	private static int ra_height = 10;
-	private static int ra_xSpeed = 10;
-	private static int ra_ySpeed = 0;
-	private static int ra_power = 10;
-	private static int ra_duration = -1;
+	private static final int RA_WIDTH = 15;
+	private static final int RA_HEIGHT = 6;
+	private static final int RA_XSPEED = 10;
+	private static final int RA_YSPEED = 0;
+	private static final int RA_POWER = 10;
+	private static final int RA_DURATION = -1;
 	
-	public RangedAttack(int xPos, int yPos, int direction) {
-		super(xPos, yPos, ra_width, ra_height, direction, ra_xSpeed, ra_ySpeed, ra_power, ra_duration);
+	public RangedAttack(int xPos, int yPos, int direction, int hashCode) {
+		super(xPos, yPos, RA_WIDTH, RA_HEIGHT, direction, RA_XSPEED, RA_YSPEED, RA_POWER, RA_DURATION, hashCode);
 		
 		
 		

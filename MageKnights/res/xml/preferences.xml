@@ -8,6 +8,7 @@
             android:title="@string/pref_user_name" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_update_setting" >
+        <!-- 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="prefSendReport"
@@ -21,7 +22,7 @@
             android:summary="@string/pref_auto_update_summary"
             android:title="@string/pref_auto_update" >
         </CheckBoxPreference>
-        
+        -->
    		<Preference
             android:key="prefReset"
             android:summary="@string/pref_reset_summary"
@@ -29,7 +30,7 @@
             android:onClick="resetScore"
         />     
     </PreferenceCategory>
-  
+  	<!--
     <PreferenceCategory android:title="@string/pref_about" >
         <Preference
             android:key="prefAbout"
@@ -37,6 +38,6 @@
             android:title="@string/pref_about"
             />
     </PreferenceCategory>
-        
+    -->
 
 </PreferenceScreen>
