@@ -114,3 +114,18 @@ public void update()
 
 ##a list of database tables and fields (and their types) that you’ve decided to implement (if needed).
 - Datatable met de volgende colomns: id, timestamp, ip_addr, name, score, game_version 
+
+##Final thoughts on this project (finished)
+###Thoughts
+- After creating this game I do realise that it is a lot more work than I expected it to be.
+It really does make me wonder how much effort and organizing goes paired with creating some of the 'big' (mobile) games.
+###Difficulties
+- Writing a lot of code without duplicating too much (since that is a bad coding practise) turned out to be quite difficult to get a grasp on, but extremely handy in the end
+- Also having this much code made it quite difficult to decide what functions should be handled by which classes.
+- For example in my Enemy and Player class I now load all of the sprites used by giving them a spritesheet, I wonder if there is a better way to deal with sprites that belong to an object.
+###Results
+- I really learned the power of object oriented programming by extending and implementing classes.
+I do believe that they make game development, or really any kind of development, less of a struggle.
+- Also I now think that static functions and variables are also quite handy since they do not need an object to be referenced too,
+but I wonder if coding like this goes paired with the best coding practises.
+

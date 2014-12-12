@@ -46,4 +46,20 @@ public class SettingsActivity extends PreferenceActivity {
     	DBHelper mydb = new DBHelper(this);
     	mydb.clearDatabase();
     }
+    
+    @Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		Media.menu.pause();
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if (!Media.menu.isPlaying()){
+			Media.menu.start();
+		}
+	}
 }

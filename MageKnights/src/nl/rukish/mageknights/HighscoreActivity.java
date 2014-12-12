@@ -75,4 +75,20 @@ public class HighscoreActivity extends ActionBarActivity {
 	public void toMenu(View view){
 		onBackPressed();
 	}
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		Media.menu.pause();
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if (!Media.menu.isPlaying()){
+			Media.menu.start();
+		}
+	}
 }

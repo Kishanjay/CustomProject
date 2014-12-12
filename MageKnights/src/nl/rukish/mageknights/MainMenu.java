@@ -38,7 +38,7 @@ public class MainMenu extends ActionBarActivity {
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
-		//media.menu.stop();
+		Media.menu.pause();
 	}
 	
 	@Override
