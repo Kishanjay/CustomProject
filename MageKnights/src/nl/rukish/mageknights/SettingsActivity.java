@@ -17,6 +17,8 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.widget.Toast;
+
 import java.util.List;
 
 public class SettingsActivity extends PreferenceActivity {
@@ -26,13 +28,18 @@ public class SettingsActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
  
         addPreferencesFromResource(R.xml.preferences);
-        Preference myPref = (Preference) findPreference("prefReset");
-        myPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-                     public boolean onPreferenceClick(Preference preference) {
-						return false;
-                         //open browser or intent here
-                     }
-                 });
+
+        
+        Preference button = (Preference)findPreference("prefReset");
+        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference arg0) {
+                        	resetScore(); 
+                        	Toast toast = Toast.makeText(getApplicationContext(), "All highscores deleted!", Toast.LENGTH_LONG);
+                            toast.show();
+                            return true;
+                        }
+                    });
     }
     
     public void resetScore(){

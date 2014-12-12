@@ -20,6 +20,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -57,13 +59,14 @@ public class GameView extends SurfaceView {
 	private Bitmap bi_heart1, bi_heart2; //icons
 	
 	// helper variables
-	private boolean scoreSubmitted, paused;
+	private boolean scoreSubmitted;
+	private static boolean paused;
 	
 	private Paint BLUEPAINT, REDPAINT, BLACKPAINT30, BLACKPAINT25, WHITEPAINT, TRANSPAINT;
 
 	//rectangle of the current screen
 	private static Rect screenRect;
-
+	
 	
 	public GameView(Context context) {
 		super(context);
@@ -75,7 +78,9 @@ public class GameView extends SurfaceView {
 		createMap(context);
 		initFunctional(); // sets all functional variables
 		initVisual(); // sets all visual variables
-
+		player1.parseSounds(context);
+		enemy1.parseSounds(context);
+		
 		// start/stop the gameloop
 		holder = getHolder();
 		holder.setFixedSize(570, 330);
@@ -83,6 +88,7 @@ public class GameView extends SurfaceView {
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
 				gameLoopThread.setRunning(false);
+				Media.gameover.pause();
 			}
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
@@ -198,6 +204,7 @@ public class GameView extends SurfaceView {
 		}
 		if (isGameOver()){
 			if (!scoreSubmitted){
+				Media.gameover.start();
 				gameViewListener.onSubmitScore(score);
 				scoreSubmitted = true;
 			}
@@ -325,6 +332,7 @@ public class GameView extends SurfaceView {
 
 	// Gamefunctions
 	private void restartGame() {
+		Media.gameover.pause();
 		score = 0;
 		scoreSubmitted = false;
 		
@@ -337,7 +345,7 @@ public class GameView extends SurfaceView {
 		gameViewListener.onStopGame();
 	}
 	
-	private void togglePause() {
+	public static void togglePause() {
 		if (isPaused()){
 			paused = false;
 		}
@@ -350,7 +358,7 @@ public class GameView extends SurfaceView {
 		score++;
 	}
 	
-	private boolean isPaused(){
+	private static boolean isPaused(){
 		return paused;
 	}
 	

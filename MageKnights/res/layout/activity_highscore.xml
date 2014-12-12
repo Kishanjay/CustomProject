@@ -2,13 +2,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" 
+    android:orientation="vertical"
     tools:context="nl.rukish.mageknights.HighscoreActivity" >
 
-    
-    <ListView android:layout_width="fill_parent"   
-      android:layout_height="fill_parent"   
-      android:id="@+id/mainListView">  
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/b_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back"
+            android:onClick="toMenu">
+        </Button>
+
+        <TextView
+            android:id="@+id/tv_highscore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Highscores"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#3404A4"
+            android:textStyle="bold"
+            android:typeface="sans" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/mainListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
     </ListView>
-    
+
 </LinearLayout>

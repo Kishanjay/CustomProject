@@ -4,8 +4,11 @@ import nl.rukish.mageknights.framework.Character;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 public class Player extends Character {
 	public static final int PLAYER_HEALTH = 5;
@@ -30,4 +33,12 @@ public class Player extends Character {
 		setB_dead(Bitmap.createBitmap(spriteSheet, 158, 961, 34, 19));
 	}
 	
+	
+	public void parseSounds(Context context){
+
+		setSndBlock(context, R.raw.block);
+		setSndHit(context, R.raw.hit2);
+		setSndShot(context, R.raw.shot2);
+		setSndDead(context, R.raw.dead);
+	}
 }

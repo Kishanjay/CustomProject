@@ -6,6 +6,7 @@ import nl.rukish.mageknights.framework.Character;
 import java.util.List;
 import java.util.Random;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
@@ -34,11 +35,20 @@ public class Enemy extends Character {
 		setB_dead(Bitmap.createBitmap(spriteSheet2, 98, 918, 40, 20));
 	}
 	
+	
+	public void parseSounds(Context context){
+		setSndBlock(context, R.raw.block);
+		setSndHit(context, R.raw.hit);
+		setSndShot(context, R.raw.shot);
+		setSndDead(context, R.raw.dead2);
+	}
+	
 	public void update() {
 		//KO SENSOR
 		if (getHealth() <= 0){
 			//increase the score
 			if (isVisible() == true){
+				playSnd(getSnddead());
 				GameView.increaseScore();
 				setVisible(false);
 			}
@@ -99,8 +109,6 @@ public class Enemy extends Character {
 		}
 
 		// update
-		stop();
-		attack();
 		super.update();
 	}
 

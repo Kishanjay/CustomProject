@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -91,7 +92,7 @@ public class GameActivity extends ActionBarActivity implements GameViewListener 
 			float delta = mAccelCurrent - mAccelLast;
 			mAccel = mAccel * 0.9f + delta; // perform low-cut filter
 			   
-			if (mAccel > 6) {
+			if (mAccel > 5) {
 				GameView.getPlayer1().onShake();
 				mAccel = 0;
 			}
@@ -100,15 +101,25 @@ public class GameActivity extends ActionBarActivity implements GameViewListener 
 		}
 	};
 
-	  @Override
-	  protected void onResume() {
-	    super.onResume();
-	    mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-	  }
-
-	  @Override
-	  protected void onPause() {
-	    mSensorManager.unregisterListener(mSensorListener);
-	    super.onPause();
-	  }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+	}
+	
+	@Override
+	protected void onPause() {
+		mSensorManager.unregisterListener(mSensorListener);
+		super.onPause();
+	}
+  
+		
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ( keyCode == KeyEvent.KEYCODE_MENU ) {
+	        GameView.togglePause();
+	        return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}   
 }

@@ -6,10 +6,14 @@ import java.util.Random;
 
 import nl.rukish.mageknights.DefendAttack;
 import nl.rukish.mageknights.GameView;
+import nl.rukish.mageknights.R;
 import nl.rukish.mageknights.RangedAttack;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 public class Character {
 	// Properties
@@ -50,6 +54,11 @@ public class Character {
 	private int b_runningDelay = 10;
 	//visibility of the character
 	private boolean visible;
+	
+	//sound
+	private SoundPool sounds;
+	private int sndshot, sndblock, sndhit, snddead;
+	private boolean died;
 
 	
 	public Character(int xPos, int yPos, int width, int height, int health) {
@@ -66,6 +75,10 @@ public class Character {
 		jumped = false;
 		direction = 1;
 		attack = new ArrayList<Attack>();
+		died = false;
+		
+		//sound stuff
+		sounds = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
 		
 		// graphic stuff
 		frameNumber = 0;
@@ -86,6 +99,7 @@ public class Character {
 		currentHealth = totalHealth;
 		visible = true;
 		jumped = false;
+		died = false;
 	}
 	
 	public void upgrade() {
@@ -136,6 +150,10 @@ public class Character {
 		
 		//check if player had died
 		if (isDead()){
+			if (died == false){
+				died = true;
+				sounds.play(snddead, 1.0f, 1.0f, 0, 0, 1);
+			}
 			speedX = 0;
 		}
 	}
@@ -248,6 +266,7 @@ public class Character {
 
 	public void attack() {
 		if (attackCooldown <= 0 && !isDead()){
+			sounds.play(sndshot, 1.0f, 1.0f, 0, 0, 1);
 			attack.add(new RangedAttack(getxPos() + getWidth()/2, getyPos() - getHeight() / 2, direction, hashCode()));
 			attackCooldown = attackDelay;
 			lastAttackFrameNumber = frameNumber;
@@ -257,6 +276,7 @@ public class Character {
 	
 	public void defend(){
 		if (!isDead()){
+			sounds.play(sndblock, 1.0f, 1.0f, 0, 0, 1);
 			defend = new DefendAttack(getxPos() + getWidth()/2, getyPos(), direction, hashCode());
 			lastDefendFrameNumber = frameNumber;
 		}
@@ -264,6 +284,7 @@ public class Character {
 	
 	public void hit(int dir){
 		//got hit
+		sounds.play(sndhit, 1.0f, 1.0f, 0, 0, 1);
 		currentHealth --;
 		setxPos(getxPos() + 2 * dir);
 	}
@@ -424,6 +445,47 @@ public class Character {
 
 	public void setB_dead(Bitmap b_dead) {
 		this.b_dead = b_dead;
+	}
+	
+	//sound getters and setters
+	public SoundPool getSounds(){
+		return sounds;
+	}
+	
+	public void playSnd(int sound){
+		sounds.play(sound, 1.0f, 1.0f, 0, 0, 1);
+	}
+	
+	public void setSndShot(Context context, int sound){
+		sndshot = sounds.load(context, sound, 1);
+	}
+	
+	public void setSndHit(Context context, int sound){
+		sndhit = sounds.load(context, sound, 1);
+	}
+
+	public void setSndBlock(Context context, int sound){
+		sndblock = sounds.load(context, sound, 1);
+	}
+	
+	public void setSndDead(Context context, int sound){
+		snddead = sounds.load(context, sound, 1);
+	}
+
+	public int getSndshot() {
+		return sndshot;
+	}
+
+	public int getSndblock() {
+		return sndblock;
+	}
+
+	public int getSndhit() {
+		return sndhit;
+	}
+
+	public int getSnddead() {
+		return snddead;
 	}
 
 }

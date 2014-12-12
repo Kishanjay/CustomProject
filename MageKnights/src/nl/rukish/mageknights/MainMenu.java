@@ -1,10 +1,10 @@
 package nl.rukish.mageknights;
 
-import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,8 +13,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-public class MainMenu extends ActionBarActivity {
 
+public class MainMenu extends ActionBarActivity {
+	
+	public static Media media;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -23,14 +26,32 @@ public class MainMenu extends ActionBarActivity {
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
+		media = new Media(MainMenu.this);
 		
 		setContentView(R.layout.activity_main_menu);
 		showUserName();
-		startGame(null);
-		//showHighscores(null);
+		
+		
+	}
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		//media.menu.stop();
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if (!Media.menu.isPlaying()){
+			Media.menu.start();
+		}
 	}
 
 	public void startGame(View view) {
+		media.menu.pause();
 		Intent intent = new Intent(MainMenu.this, GameActivity.class);
 		MainMenu.this.startActivity(intent);
 	}
@@ -61,23 +82,13 @@ public class MainMenu extends ActionBarActivity {
     public void showUserName(){
     	SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
-    	
     	String username = sharedPrefs.getString("prefUsername", "NULL");
-
- 
+    	
         TextView userNameTextView = (TextView) findViewById(R.id.tv_username);
- 
-        userNameTextView.setText(username);
+        userNameTextView.setText("Welcome " + username);
     }
 	
-	// MENU STUFF
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main_menu, menu);
-		return true;
-	}
-	
+	//change default menu button
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 	    if ( keyCode == KeyEvent.KEYCODE_MENU ) {
@@ -86,16 +97,4 @@ public class MainMenu extends ActionBarActivity {
 	    }
 	    return super.onKeyDown(keyCode, event);
 	}   
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
 }
